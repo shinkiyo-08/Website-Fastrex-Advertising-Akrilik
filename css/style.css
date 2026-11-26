@@ -180,3 +180,10 @@ header.header-scrolled { box-shadow: 0 4px 24px rgba(0, 0, 0, 0.09); }
 .menu-btn-ig { background: rgba(255,255,255,0.55); color: #151c27; border: 1px solid rgba(255,255,255,0.75); }
 html.menu-open { overflow: hidden; }
 @media (min-width: 768px) { .menu-overlay { display: none; } }
+
+/* Mobile: kartu bisa digeser kanan-kiri (Layanan, Katalog, Digital Printing, Galeri) */
+@media (max-width: 767px) {
+  .swipe-row { display: flex; gap: 14px; overflow-x: auto; margin-inline: -1rem; padding: 8px 1rem 20px; scroll-snap-type: x mandatory; scroll-padding-inline: 1rem; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .swipe-row::-webkit-scrollbar { display: none; }
+  .swipe-row > * { flex: 0 0 80%; max-width: 330px; scroll-snap-align: start; opacity: 1 !important; transform: none !important; }
+}
