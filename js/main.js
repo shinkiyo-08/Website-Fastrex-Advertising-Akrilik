@@ -1,4 +1,4 @@
-/* Fastrex — interaksi halaman (typewriter hero & animasi muncul saat scroll) */
+/* Fastrex — interaksi halaman (typewriter hero, animasi scroll, menu mobile) */
 document.addEventListener('DOMContentLoaded', () => {
   // 1. DYNAMIC LOOPING KEYWORD TYPEWRITER ANIMATION
   // Loops between: "Laser Cutting", "Neon Box", "Huruf Timbul"
@@ -54,48 +54,60 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, 120);
 
-  // 3. POP-UP ENTRANCE FOR OTHER CARDS, CTAS, AND BADGES (STAGGERED WITH SPRING POP FEEL)
-  const popUpElements = document.querySelectorAll('.pop-up-item');
-  if ('IntersectionObserver' in window) {
-    const popUpObserver = new IntersectionObserver((entries, observer) => {
+  // 3. ANIMASI MUNCUL SAAT SCROLL (fade + naik, bertahap per kelompok kartu)
+  const revealEls = document.querySelectorAll('.pop-up-item, .reveal-item');
+  if ('IntersectionObserver' in window && !isReducedMotion) {
+    const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          // Check sibling index for natural staggered entrance
-          const parent = entry.target.parentElement;
-          const siblings = parent ? Array.from(parent.querySelectorAll('.pop-up-item')) : [];
-          const siblingIndex = siblings.indexOf(entry.target);
-          const delay = siblingIndex >= 0 ? siblingIndex * 80 : 40;
-
-          setTimeout(() => {
-            entry.target.classList.add('is-revealed');
-          }, delay);
-          observer.unobserve(entry.target);
-        }
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const group = el.parentElement ? Array.from(el.parentElement.children).filter(c => c.matches('.pop-up-item, .reveal-item')) : [];
+        el.style.transitionDelay = Math.min(Math.max(group.indexOf(el), 0), 5) * 90 + 'ms';
+        el.classList.add('is-revealed');
+        io.unobserve(el);
+        setTimeout(() => { el.style.transitionDelay = ''; }, 1200); // supaya efek hover tetap responsif
       });
-    }, {
-      threshold: 0.08,
-      rootMargin: '0px 0px -20px 0px'
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => io.observe(el));
+  } else {
+    revealEls.forEach(el => el.classList.add('is-revealed'));
+  }
+
+  // 4. PROGRES SCROLL & BAYANGAN HEADER
+  const bar = document.getElementById('scroll-progress');
+  const header = document.querySelector('header');
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (bar) bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(window.scrollY / max, 1) : 0) + ')';
+      if (header) header.classList.toggle('header-scrolled', window.scrollY > 8);
+      ticking = false;
     });
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 
-    popUpElements.forEach(el => popUpObserver.observe(el));
-  } else {
-    popUpElements.forEach(el => el.classList.add('is-revealed'));
+  // 5. MENU POP-UP MOBILE (hamburger)
+  const menu = document.getElementById('menu-modal');
+  const openBtn = document.getElementById('menu-toggle');
+  if (menu && openBtn) {
+    const setMenu = (open) => {
+      menu.classList.toggle('is-open', open);
+      menu.setAttribute('aria-hidden', String(!open));
+      openBtn.setAttribute('aria-expanded', String(open));
+      document.documentElement.classList.toggle('menu-open', open);
+      (open ? menu.querySelector('[data-menu-close]') : openBtn).focus();
+    };
+    openBtn.addEventListener('click', () => setMenu(true));
+    menu.addEventListener('click', (e) => {
+      if (e.target === menu || e.target.closest('[data-menu-close]') || e.target.closest('a')) setMenu(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.classList.contains('is-open')) setMenu(false);
+    });
+    window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
   }
-
-  // 4. Standard section headers reveal
-  const standardReveals = document.querySelectorAll('.reveal-item');
-  if ('IntersectionObserver' in window) {
-    const revealObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-revealed');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-    standardReveals.forEach(el => revealObserver.observe(el));
-  } else {
-    standardReveals.forEach(el => el.classList.add('is-revealed'));
-  }
-
 });
