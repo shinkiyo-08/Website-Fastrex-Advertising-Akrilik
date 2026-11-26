@@ -183,7 +183,7 @@ html.menu-open { overflow: hidden; }
 
 /* Mobile: kartu bisa digeser kanan-kiri (Layanan, Katalog, Digital Printing, Galeri) */
 @media (max-width: 767px) {
-  .swipe-row { display: flex; gap: 14px; overflow-x: auto; margin-inline: -1rem; padding: 8px 1rem 20px; scroll-snap-type: x mandatory; scroll-padding-inline: 1rem; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; }
-  .swipe-row::-webkit-scrollbar { display: none; }
-  .swipe-row > * { flex: 0 0 80%; max-width: 330px; scroll-snap-align: start; opacity: 1 !important; transform: none !important; }
+  .swipe-row.grid { display: flex; gap: 14px; overflow-x: auto; margin-inline: -1rem; padding: 8px 1rem 20px; scroll-snap-type: x mandatory; scroll-padding-inline: 1rem; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .swipe-row.grid::-webkit-scrollbar { display: none; }
+  .swipe-row.grid > * { flex: 0 0 80%; max-width: 330px; scroll-snap-align: start; opacity: 1 !important; transform: none !important; }
 }
