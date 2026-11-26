@@ -110,4 +110,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
   }
+
+  // 6. ANIMASI KARTU GESER DI MOBILE (masuk bertahap + kartu aktif membesar)
+  const swipeRows = document.querySelectorAll('.swipe-row');
+  if (swipeRows.length && !isReducedMotion && 'IntersectionObserver' in window) {
+    const isMobile = window.matchMedia('(max-width: 767px)');
+    const st = document.createElement('style');
+    st.textContent = '@media (max-width: 767px) {' +
+      'section .swipe-row.grid > * { opacity: 0 !important; transform: translateX(44px) scale(0.95) !important; transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1) !important; }' +
+      'section .swipe-row.grid.swipe-in > * { opacity: 0.55 !important; transform: scale(0.94) !important; }' +
+      'section .swipe-row.grid.swipe-in > .is-active { opacity: 1 !important; transform: none !important; }' +
+    '}';
+    document.head.appendChild(st);
+
+    const rowIO = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const row = entry.target;
+        const cards = Array.from(row.children);
+        if (isMobile.matches) cards.slice(0, 4).forEach((c, i) => { c.style.transitionDelay = i * 90 + 'ms'; });
+        row.classList.add('swipe-in');
+        setTimeout(() => cards.forEach((c) => { c.style.transitionDelay = ''; }), 900);
+        rowIO.unobserve(row);
+      });
+    }, { threshold: 0.2 });
+
+    swipeRows.forEach((row) => {
+      rowIO.observe(row);
+      const cardIO = new IntersectionObserver((entries) => {
+        entries.forEach((en) => en.target.classList.toggle('is-active', en.isIntersecting));
+      }, { root: row, threshold: 0.6 });
+      Array.from(row.children).forEach((c) => cardIO.observe(c));
+    });
+  }
 });
